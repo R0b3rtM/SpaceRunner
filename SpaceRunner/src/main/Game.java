@@ -2,13 +2,16 @@ package main;
 
 import java.awt.Graphics;
 
+import level.LevelGenerator;
+
 public class Game implements Runnable{
 	
 	private GameWindow game_window;
 	private GamePanel game_panel;
+	private LevelGenerator level_gen;
 	
-	private final int FPS_SET = 120;
-	private final int UPS_SET = 200;
+	public static final int FPS_SET = 120;
+	public static final int UPS_SET = 200;
 	
 	private Thread game_thread;
 	
@@ -20,20 +23,20 @@ public class Game implements Runnable{
 	public final static int GAME_WIDTH = TILES_SIZE * TILES_IN_WIDTH;
 	public final static int GAME_HEIGHT = TILES_SIZE * TILES_IN_HEIGHT;
 	
-	private void update() {
-		
-	}
-	
-	public void render(Graphics g) {
-
-	}
-	
 	public Game() {
-		
+		level_gen = new LevelGenerator();
 		game_panel = new GamePanel(this);
 		game_window =  new GameWindow(game_panel);
 		
 		start_game();
+	}
+	
+	private void update() {
+		level_gen.update();
+	}
+	
+	public void render(Graphics g) {
+		level_gen.render(g);
 	}
 	
 	private void start_game() {
