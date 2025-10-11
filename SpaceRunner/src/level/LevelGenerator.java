@@ -11,13 +11,17 @@ public class LevelGenerator {
 	
 	private Random rnd;
 	private BufferedImage[] level_tiles;
-	private Platform head;
-	private Platform tail;
+	
+	private ChunkPlatform head_chunk;
+	private ChunkPlatform tail_chunk;
+	private FloorPlatform head_floor;
+	private FloorPlatform tail_floor;
 	
 	private static final int MAX_PLT_SIZE = 4;
 	private static final int MIN_PLT_SIZE = 2;
 	
 	private float level_speed = 0.5f;
+	private int floor_cnt = 0;
 	private int plt_spwn_sec = 4;
 	private int update_tick = 0;
 	
@@ -29,10 +33,10 @@ public class LevelGenerator {
 	
 	public void update() {
 		
-		// Platform generation.
+		// Platform chunks spawn.
 		if(update_tick >= plt_spwn_sec * Game.UPS_SET) {
 			update_tick = 0;
-			spawnPlatform();
+			spawnChunk();
 		}
 		update_tick++;
 		
@@ -42,43 +46,78 @@ public class LevelGenerator {
 
 	public void render(Graphics g) {
 		//drawAllTiles_debug(g);
-		for(Platform curr_plt = head; curr_plt != null;curr_plt = curr_plt.getNext()) {
+		
+		// Render platform chunks.
+		for(ChunkPlatform curr_plt = head_chunk; curr_plt != null;curr_plt = curr_plt.getNext()) {
 			renderPlatform(g, curr_plt);
 		}
-				
+		
+		// Render floor.
+		for(FloorPlatform curr_plt = head_floor; curr_plt != null;curr_plt = curr_plt.getNext()) {
+			//renderPlatform(g, curr_plt);
+			for(int i=0; i<curr_plt.getSize(); i++) {
+				g.drawImage(curr_plt.getPltTile(i), (int)curr_plt.getX() + (i * Game.TILES_SIZE), (int)curr_plt.getY(), Game.TILES_SIZE, Game.TILES_SIZE, null);
+			}
+		}
 	}
 	
 	private void movePlatforms() {
 		
 		// Passed platforms remover.
-		if(head != null && head.getX() <= (0 - head.getSize()*Game.TILES_SIZE)) {
-			Platform tmp = head;
-			head = tmp.getNext();
+		if(head_chunk != null && head_chunk.getX() <= (0 - head_chunk.getSize()*Game.TILES_SIZE)) {
+			ChunkPlatform tmp = head_chunk;
+			head_chunk = tmp.getNext();
 			tmp = null;
 		}
 		
-		// Move every platform on the list by the level speed.
-		for(Platform curr_plt = head; curr_plt != null;curr_plt = curr_plt.getNext()) {
-			curr_plt.updatePosX(level_speed);
+		// Move every platform chunk on the list by the level speed.
+		for(ChunkPlatform curr_chunk = head_chunk; curr_chunk != null;curr_chunk = curr_chunk.getNext()) {
+			curr_chunk.updatePosX(level_speed);
+		}
+		
+		if(floor_cnt<2)
+			spawnFloor();
+		
+		// Passed floor remover.
+		if(head_floor.getX() <= (0 - head_floor.getSize()*Game.TILES_SIZE)) {
+			FloorPlatform tmp = head_floor;
+			head_floor = tmp.getNext();
+			tmp = null;
+			floor_cnt--;
+		}
+		
+		// Move every platform floor on the list by the level speed.
+		for(FloorPlatform curr_floor = head_floor; curr_floor != null; curr_floor = curr_floor.getNext()) {
+			curr_floor.updatePosX(level_speed);
 		}
 		
 	}
 	
-	private void spawnPlatform() {
+	private void spawnChunk() {
 		
 		// Generate a platform.
 		int new_size = rnd.nextInt(MAX_PLT_SIZE) + MIN_PLT_SIZE;
-		Platform new_plt = new Platform(Game.GAME_WIDTH - (new_size * Game.TILES_SIZE), rnd.nextInt(Game.GAME_HEIGHT/2) + 200, new_size, level_tiles);
+		ChunkPlatform new_plt = new ChunkPlatform(Game.GAME_WIDTH - (new_size * Game.TILES_SIZE), rnd.nextInt(Game.GAME_HEIGHT/2) + 200, new_size, level_tiles);
 		
 		// Add platform to a linked list.
-		if(head == null) {
-			head = new_plt;
-			tail = new_plt;
+		if(head_chunk == null) {
+			head_chunk = new_plt;
+			tail_chunk = new_plt;
 		} else {
-			tail.setNext(new_plt);
-			tail = new_plt;
+			tail_chunk.setNext(new_plt);
+			tail_chunk = new_plt;
 		}
 		
+	}
+	
+	private void spawnFloor() {
+		
+		FloorPlatform new_plt = new FloorPlatform(Game.GAME_WIDTH, Game.GAME_HEIGHT - Game.TILES_SIZE, Game.TILES_IN_WIDTH, level_tiles);
+		
+		// Add platform to a linked list.
+		tail_floor.setNext(new_plt);
+		tail_floor = new_plt;
+		floor_cnt++;
 	}
 	
 	private void levelInit() {
@@ -86,6 +125,7 @@ public class LevelGenerator {
 		int tiles_in_width = tiles_sprite.getWidth()/Game.TILES_DEFAULT_SIZE;
 		int tiles_in_height = tiles_sprite.getHeight()/Game.TILES_DEFAULT_SIZE;
 		int tiles_index = 0;
+		
 		level_tiles = new BufferedImage[tiles_in_width * tiles_in_height];
 		
 		for(int j=0; j<tiles_in_height; j++) {
@@ -94,6 +134,12 @@ public class LevelGenerator {
 				tiles_index++;
 			}
 		}
+		
+		// Floor spawn
+		head_floor = new FloorPlatform(0, Game.GAME_HEIGHT - Game.TILES_SIZE, Game.TILES_IN_WIDTH, level_tiles);
+		tail_floor = head_floor;
+		floor_cnt++;
+
 	}
 	
 	private void renderPlatform(Graphics g, Platform plt) {
