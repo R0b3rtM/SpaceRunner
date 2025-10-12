@@ -11,6 +11,7 @@ public class LevelGenerator {
 	
 	private Random rnd;
 	private BufferedImage[] level_tiles;
+	private ChunkPlatform collision_plt;
 	
 	private ChunkPlatform head_chunk;
 	private ChunkPlatform tail_chunk;
@@ -20,7 +21,7 @@ public class LevelGenerator {
 	private static final int MAX_PLT_SIZE = 4;
 	private static final int MIN_PLT_SIZE = 2;
 	
-	private float level_speed = 0.5f;
+	private float level_speed = 1f;
 	private int floor_cnt = 0;
 	private int plt_spwn_sec = 4;
 	private int update_tick = 0;
@@ -28,7 +29,17 @@ public class LevelGenerator {
 	public LevelGenerator() {
 		rnd = new Random();
 		levelInit();
+	}
+	
+	public ChunkPlatform getCollisionPlt() {
+		if(collision_plt == null)
+			collision_plt = head_chunk;
 		
+		return collision_plt;
+	}
+	
+	public void setCollisionPlt() {
+		collision_plt = collision_plt.getNext();
 	}
 	
 	public void update() {
@@ -130,10 +141,13 @@ public class LevelGenerator {
 		
 		for(int j=0; j<tiles_in_height; j++) {
 			for(int i=0; i<tiles_in_width; i++) {
-				level_tiles[tiles_index] = LoadSprite.GetSubSprite(i*Game.TILES_DEFAULT_SIZE, j*Game.TILES_DEFAULT_SIZE, tiles_sprite);
+				level_tiles[tiles_index] = LoadSprite.GetSubSprite(i*Game.TILES_DEFAULT_SIZE, j*Game.TILES_DEFAULT_SIZE, Game.TILES_DEFAULT_SIZE, Game.TILES_DEFAULT_SIZE, tiles_sprite);
 				tiles_index++;
 			}
 		}
+		
+		// First chunk spawn
+		spawnChunk();
 		
 		// Floor spawn
 		head_floor = new FloorPlatform(0, Game.GAME_HEIGHT - Game.TILES_SIZE, Game.TILES_IN_WIDTH, level_tiles);

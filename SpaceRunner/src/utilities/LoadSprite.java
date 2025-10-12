@@ -10,6 +10,7 @@ import main.Game;
 
 public class LoadSprite {
 	
+	public static final String PLAYER_SPRITE = "Player.png";
 	public static final String TILES_SPRITE = "Tiles.png";
 	
 	public static BufferedImage LoadSpriteImg(String sprite_url) {
@@ -26,8 +27,8 @@ public class LoadSprite {
 		return sprite;
 	}
 	
-	public static BufferedImage GetSubSprite(int i, int j, BufferedImage sprite) {
-		BufferedImage sub_sprite = sprite.getSubimage(i, j, Game.TILES_DEFAULT_SIZE, Game.TILES_DEFAULT_SIZE);
+	public static BufferedImage GetSubSprite(int i, int j, int width, int height, BufferedImage sprite) {
+		BufferedImage sub_sprite = sprite.getSubimage(i, j, width, height);
 		return sub_sprite;
 	}
 }

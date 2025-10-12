@@ -2,6 +2,7 @@ package main;
 
 import java.awt.Graphics;
 
+import entities.Player;
 import level.LevelGenerator;
 
 public class Game implements Runnable{
@@ -9,6 +10,7 @@ public class Game implements Runnable{
 	private GameWindow game_window;
 	private GamePanel game_panel;
 	private LevelGenerator level_gen;
+	private Player player;
 	
 	public static final int FPS_SET = 120;
 	public static final int UPS_SET = 200;
@@ -25,18 +27,27 @@ public class Game implements Runnable{
 	
 	public Game() {
 		level_gen = new LevelGenerator();
+		player = new Player(200, 200, level_gen);
 		game_panel = new GamePanel(this);
 		game_window =  new GameWindow(game_panel);
 		
+		// Requests a keyboard focus to the panel.  
+		game_panel.requestFocus();
 		start_game();
 	}
 	
-	private void update() {
-		level_gen.update();
+	public Player getPlayer() {
+		return player;
 	}
 	
 	public void render(Graphics g) {
 		level_gen.render(g);
+		player.render(g);
+	}
+	
+	private void update() {
+		level_gen.update();
+		player.update();
 	}
 	
 	private void start_game() {
