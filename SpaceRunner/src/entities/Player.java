@@ -17,8 +17,7 @@ public class Player extends Entity{
 	private int draw_offset_width = (int)(16 * Game.SCALE);
 		
 	private boolean jump, inAir;
-	private float jump_force = -4f * Game.SCALE, air_speed = 0, gravity = 0.04f;
-	private float curr_plt_y, curr_plt_x;
+	private float jump_force = -4f * Game.SCALE, air_speed = 0, gravity = 0.06f;
 	
 	public Player(float x, float y, LevelGenerator level_gen) {
 		super(x, y, level_gen);
@@ -43,21 +42,16 @@ public class Player extends Entity{
 	}
 	
 	private void pos_update() {
+		//System.out.println(hit_box.y);
 		
-		if(!platformCollision(hit_box, level_gen)) {
-			air_speed += gravity;
+		if(!isOnFloor(hit_box) && !isOnPlatform(hit_box, level_gen)) {
 			inAir = true;
-		}else {
-			inAir = false;
-			air_speed = 0;
+			air_speed += gravity;
 		}
-		
-		if(!isOnFloor(hit_box)) {
-			air_speed += gravity;
-			inAir = true;
-		}else {
+		else {
 			inAir = false;
 			air_speed = 0;
+			hit_box.y = getEntityVerticalePos(hit_box, air_speed);
 		}
 		
 		if(jump) {

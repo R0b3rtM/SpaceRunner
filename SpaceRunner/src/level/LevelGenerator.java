@@ -108,8 +108,9 @@ public class LevelGenerator {
 		
 		// Generate a platform.
 		int new_size = rnd.nextInt(MAX_PLT_SIZE) + MIN_PLT_SIZE;
-		ChunkPlatform new_plt = new ChunkPlatform(Game.GAME_WIDTH - (new_size * Game.TILES_SIZE), rnd.nextInt(Game.GAME_HEIGHT/2) + 200, new_size, level_tiles);
-		
+		int new_pos = (int)(rnd.nextInt(Game.GAME_HEIGHT/2) + 200);
+		ChunkPlatform new_plt = new ChunkPlatform(Game.GAME_WIDTH - (new_size * Game.TILES_SIZE), new_pos, new_size, level_tiles);
+		System.out.println(new_pos/Game.TILES_SIZE);
 		// Add platform to a linked list.
 		if(head_chunk == null) {
 			head_chunk = new_plt;
