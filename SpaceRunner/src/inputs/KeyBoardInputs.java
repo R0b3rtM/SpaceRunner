@@ -22,8 +22,11 @@ public class KeyBoardInputs implements KeyListener{
 	@Override
 	public void keyPressed(KeyEvent e) {
 		switch (e.getKeyCode()) {
-		case KeyEvent.VK_SPACE:
+		case KeyEvent.VK_UP:
 			game_panel.getGame().getPlayer().setJump(true);
+			break;
+		case KeyEvent.VK_SPACE:
+			game_panel.getGame().getPlayer().tryShoot();
 			break;
 		}
 		
@@ -32,7 +35,7 @@ public class KeyBoardInputs implements KeyListener{
 	@Override
 	public void keyReleased(KeyEvent e) {
 		switch (e.getKeyCode()) {
-		case KeyEvent.VK_SPACE:
+		case KeyEvent.VK_UP:
 			game_panel.getGame().getPlayer().setJump(false);
 			break;
 		}

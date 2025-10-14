@@ -8,22 +8,27 @@ import level.LevelGenerator;
 
 import main.Game;
 import utilities.LoadSprite;
+import utilities.Shootable;
+import utilities.ShootingHandler;
 
 import static utilities.Constants.PlayerConstants.*;
 import static utilities.Collisions.*;
 
-public class Player extends Entity{
+public class Player extends Entity implements Shootable{
 	
 	private BufferedImage[][] player;
+	private ShootingHandler shoot_handler;
 	private int player_anim = RUN_ANIM, anim_state = 0, anim_tick, anim_speed = 30;
 	private int draw_offset_width = (int)(16 * Game.SCALE);
 		
 	private boolean jump, inAir;
 	private float jump_force = -4f * Game.SCALE, air_speed = 0, gravity = 0.1f, fall_speed = 0.1f;
+	private int shoot_time = Game.UPS_SET * 4;
 	
 	public Player(int x, int y, LevelGenerator level_gen) {
 		super(x, y, level_gen);
 		player = new BufferedImage[ANIM_AMOUNT][ANIM_FRAMES];
+		shoot_handler = new ShootingHandler(shoot_time, this);
 		
 		hitBoxInit(x, y, (int)(30 * Game.SCALE), (int)(64 * Game.SCALE));
 		animInit();
@@ -32,6 +37,7 @@ public class Player extends Entity{
 	public void update() {
 		animUpdate();
 		posUpdate();
+		shoot_handler.shootUpdate();
 	}
 	
 	public void render(Graphics g) {
@@ -41,6 +47,15 @@ public class Player extends Entity{
 	
 	public void setJump(boolean state) {
 		jump = state;
+	}
+	
+	public void tryShoot() {
+		shoot_handler.tryShoot();
+	}
+	
+	@Override
+	public void shoot() {
+		System.out.println("Shoot!");
 	}
 	
 	private void posUpdate() {
