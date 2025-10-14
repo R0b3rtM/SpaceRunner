@@ -21,9 +21,9 @@ public class LevelGenerator {
 	private static final int MAX_PLT_SIZE = 4;
 	private static final int MIN_PLT_SIZE = 2;
 	private static final int MAX_PLT_HEIGHT = 10;
-	private static final int MIN_PLT_HEIGHT = 3;
+	private static final int MIN_PLT_HEIGHT = 6;
 	
-	private float level_speed = 1f;
+	private float level_speed = 1;
 	private int floor_cnt = 0;
 	private int plt_spwn_sec = 4;
 	private int update_tick = 0;

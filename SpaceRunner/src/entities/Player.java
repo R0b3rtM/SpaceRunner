@@ -1,12 +1,14 @@
 package entities;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
+import level.ChunkPlatform;
 import level.LevelGenerator;
+
 import main.Game;
 import utilities.LoadSprite;
+
 import static utilities.Constants.PlayerConstants.*;
 import static utilities.Collisions.*;
 
@@ -17,9 +19,9 @@ public class Player extends Entity{
 	private int draw_offset_width = (int)(16 * Game.SCALE);
 		
 	private boolean jump, inAir;
-	private float jump_force = -4f * Game.SCALE, air_speed = 0, gravity = 0.1f;
+	private float jump_force = -4f * Game.SCALE, air_speed = 0, gravity = 0.1f, fall_speed = 0.1f;
 	
-	public Player(float x, float y, LevelGenerator level_gen) {
+	public Player(int x, int y, LevelGenerator level_gen) {
 		super(x, y, level_gen);
 		player = new BufferedImage[ANIM_AMOUNT][ANIM_FRAMES];
 		
@@ -42,12 +44,19 @@ public class Player extends Entity{
 	}
 	
 	private void posUpdate() {
-		//System.out.println(hit_box.y);
+		ChunkPlatform plt = getPlatform(this, level_gen);
 		
-		if(!isOnFloor(hit_box) && !isOnPlatform(this, level_gen)) {
-			inAir = true;
-			air_speed += gravity;
+		if(!isOnGround(this, plt)) {
+			inAir = true;	
 			animSet(JUMP_ANIM);
+			
+			//Check collision with left side of platform or with bottom of platform
+			if(isCollide(hit_box.x, hit_box.y, plt.getX(), plt.getY(), plt.getSize()) || isCollide(plt.getY(), plt.getX() - 1, hit_box.y, hit_box.x, (int)hit_box.height)) {
+				air_speed = fall_speed;
+				hit_box.y = getEntityVerticalePos(hit_box, air_speed);
+			}else {
+				air_speed += gravity;
+			}
 		}
 		else {
 			inAir = false;
@@ -61,10 +70,6 @@ public class Player extends Entity{
 		
 		hit_box.y += air_speed;
 		
-	}
-	
-	public void setAirSpeed() {
-		air_speed += 0.5;
 	}
 	
 	private void jump() {
@@ -103,10 +108,5 @@ public class Player extends Entity{
 				player[j][i] = LoadSprite.GetSubSprite(i * (Game.TILES_DEFAULT_SIZE * 2), j * (Game.TILES_DEFAULT_SIZE * 2),Game.TILES_DEFAULT_SIZE * 2, Game.TILES_DEFAULT_SIZE * 2, player_sprite);
 			}
 		}
-	}
-	
-	protected void drawHitBox(Graphics g) {
-		g.setColor(Color.RED);
-		g.drawRect((int)hit_box.x, (int)hit_box.y, (int)hit_box.width, (int)hit_box.height);
 	}
 }

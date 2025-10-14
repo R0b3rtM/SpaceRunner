@@ -13,7 +13,7 @@ public class Entity {
 	protected Rectangle2D.Float hit_box;
 	protected LevelGenerator level_gen;
 	
-	public Entity(float x, float y, LevelGenerator level_gen) {
+	public Entity(int x, int y, LevelGenerator level_gen) {
 		this.x = x;
 		this.y = y;
 		this.level_gen = level_gen;
@@ -23,7 +23,7 @@ public class Entity {
 		return hit_box;
 	}
 	
-	protected void hitBoxInit(float x, float y, float width, float height) {
+	protected void hitBoxInit(int x, int y, int width, int height) {
 		hit_box = new Rectangle2D.Float(x, y, width, height);
 	}
 	
