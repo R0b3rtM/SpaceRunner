@@ -2,6 +2,7 @@ package utilities;
 
 import java.awt.geom.Rectangle2D;
 
+import entities.Player;
 import level.ChunkPlatform;
 import level.LevelGenerator;
 import main.Game;
@@ -14,7 +15,6 @@ public class Collisions {
 		if(air_speed > 0) {
 			//Falling
 			int tile_y_pos = curr_tile * Game.TILES_SIZE;
-			int y_offset = (int)(Game.TILES_SIZE * 2 - hit_box.height);
 			
 			return tile_y_pos;
 		}else {
@@ -33,8 +33,8 @@ public class Collisions {
 		return false;
 	}
 	
-	public static boolean isOnPlatform(Rectangle2D.Float hit_box, LevelGenerator level_gen) {
-		
+	public static boolean isOnPlatform(Player player, LevelGenerator level_gen) {
+		Rectangle2D.Float hit_box = player.getHitBox();
 		ChunkPlatform plt = level_gen.getCollisionPlt();
 		int curr_plt_pos = (int)(plt.getX() / Game.TILES_SIZE);
 		int curr_hitbox_pos = (int)(hit_box.getX() / Game.TILES_SIZE);
@@ -44,10 +44,32 @@ public class Collisions {
 			plt = level_gen.getCollisionPlt();
 		}
 		
-		return isCollide(hit_box, plt);
+		if(isCollideTop(hit_box, plt))
+			player.setAirSpeed();
+			
+		
+		return isCollideBottom(hit_box, plt);
 	}
 	
-	public static boolean isCollide(Rectangle2D.Float hit_box, ChunkPlatform plt) {
+	public static boolean isCollideTop(Rectangle2D.Float hit_box, ChunkPlatform plt) {
+		
+		int curr_tile_x = (int)(hit_box.getX() / Game.TILES_SIZE);
+		int curr_tile_y = (int)(hit_box.getY() / Game.TILES_SIZE);
+		
+		int plt_tile_x = (int)(plt.getX() / Game.TILES_SIZE);
+		int plt_tile_y = (int)(plt.getY() / Game.TILES_SIZE);
+		int plt_size = plt.getSize();
+		
+		if(curr_tile_x >= plt_tile_x && curr_tile_x <= plt_tile_x + plt_size) {
+			if(plt_tile_y == curr_tile_y) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	private static boolean isCollideBottom(Rectangle2D.Float hit_box, ChunkPlatform plt) {
 		
 		int curr_tile_x = (int)((hit_box.getX()) / Game.TILES_SIZE);
 		int curr_tile_y = (int)((hit_box.getY() + hit_box.height) / Game.TILES_SIZE);
@@ -64,4 +86,5 @@ public class Collisions {
 		
 		return false;
 	}
+	
 }

@@ -17,50 +17,54 @@ public class Player extends Entity{
 	private int draw_offset_width = (int)(16 * Game.SCALE);
 		
 	private boolean jump, inAir;
-	private float jump_force = -4f * Game.SCALE, air_speed = 0, gravity = 0.06f;
+	private float jump_force = -4f * Game.SCALE, air_speed = 0, gravity = 0.1f;
 	
 	public Player(float x, float y, LevelGenerator level_gen) {
 		super(x, y, level_gen);
 		player = new BufferedImage[ANIM_AMOUNT][ANIM_FRAMES];
 		
 		hitBoxInit(x, y, (int)(30 * Game.SCALE), (int)(64 * Game.SCALE));
-		anim_set();
+		animInit();
 	}
 	
 	public void update() {
-		anim_update();
-		pos_update();
+		animUpdate();
+		posUpdate();
 	}
 	
 	public void render(Graphics g) {
 		g.drawImage(player[player_anim][anim_state], (int)hit_box.x - draw_offset_width, (int)hit_box.y, Game.TILES_SIZE * 2, Game.TILES_SIZE * 2, null);
-		drawHitBox(g);
+		//drawHitBox(g);
 	}
 	
 	public void setJump(boolean state) {
 		jump = state;
 	}
 	
-	private void pos_update() {
+	private void posUpdate() {
 		//System.out.println(hit_box.y);
 		
-		if(!isOnFloor(hit_box) && !isOnPlatform(hit_box, level_gen)) {
+		if(!isOnFloor(hit_box) && !isOnPlatform(this, level_gen)) {
 			inAir = true;
 			air_speed += gravity;
+			animSet(JUMP_ANIM);
 		}
 		else {
 			inAir = false;
 			air_speed = 0;
+			animSet(RUN_ANIM);
 			hit_box.y = getEntityVerticalePos(hit_box, air_speed);
 		}
 		
-		if(jump) {
-			
+		if(jump)
 			jump();
-		}
 		
 		hit_box.y += air_speed;
 		
+	}
+	
+	public void setAirSpeed() {
+		air_speed += 0.5;
 	}
 	
 	private void jump() {
@@ -70,19 +74,28 @@ public class Player extends Entity{
 		air_speed = jump_force;
 	}
 	
-	private void anim_update() {
-		
+	private void animSet(int anim) {
+		if(anim == player_anim)
+			return;
+		anim_state = 0;
+		player_anim = anim;
+	}
+	
+	private void animUpdate() {
+
 		if(anim_tick >= anim_speed) {
 			anim_state++;
 			anim_tick = 0;
 			
-			if(anim_state >= ANIM_FRAMES)
+			if(anim_state >= ANIM_FRAMES && player_anim != JUMP_ANIM)
 				anim_state = 0;
+			else if(player_anim == JUMP_ANIM)
+				anim_state = ANIM_FRAMES-1;
 		}
 		anim_tick++;
 	}
 	
-	private void anim_set() {
+	private void animInit() {
 		BufferedImage player_sprite = LoadSprite.LoadSpriteImg(LoadSprite.PLAYER_SPRITE);
 		
 		for(int j=0; j<ANIM_AMOUNT; j++) {

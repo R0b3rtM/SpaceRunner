@@ -20,6 +20,8 @@ public class LevelGenerator {
 	
 	private static final int MAX_PLT_SIZE = 4;
 	private static final int MIN_PLT_SIZE = 2;
+	private static final int MAX_PLT_HEIGHT = 10;
+	private static final int MIN_PLT_HEIGHT = 3;
 	
 	private float level_speed = 1f;
 	private int floor_cnt = 0;
@@ -108,9 +110,10 @@ public class LevelGenerator {
 		
 		// Generate a platform.
 		int new_size = rnd.nextInt(MAX_PLT_SIZE) + MIN_PLT_SIZE;
-		int new_pos = (int)(rnd.nextInt(Game.GAME_HEIGHT/2) + 200);
+		int new_pos = (int)(rnd.nextInt(MAX_PLT_HEIGHT - MIN_PLT_HEIGHT) + MIN_PLT_HEIGHT) * Game.TILES_SIZE;
+		
 		ChunkPlatform new_plt = new ChunkPlatform(Game.GAME_WIDTH - (new_size * Game.TILES_SIZE), new_pos, new_size, level_tiles);
-		System.out.println(new_pos/Game.TILES_SIZE);
+		
 		// Add platform to a linked list.
 		if(head_chunk == null) {
 			head_chunk = new_plt;
@@ -123,8 +126,8 @@ public class LevelGenerator {
 	}
 	
 	private void spawnFloor() {
-		
-		FloorPlatform new_plt = new FloorPlatform(Game.GAME_WIDTH, Game.GAME_HEIGHT - Game.TILES_SIZE, Game.TILES_IN_WIDTH, level_tiles);
+		float new_pos_x = head_floor.getX() + Game.GAME_WIDTH;
+		FloorPlatform new_plt = new FloorPlatform(new_pos_x, Game.GAME_HEIGHT - Game.TILES_SIZE, Game.TILES_IN_WIDTH, level_tiles);
 		
 		// Add platform to a linked list.
 		tail_floor.setNext(new_plt);
