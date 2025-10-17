@@ -1,6 +1,9 @@
 package entities;
 
+import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import level.ChunkPlatform;
@@ -18,12 +21,15 @@ public class Player extends Entity implements Shootable{
 	
 	private BufferedImage[][] player;
 	private ShootingHandler shoot_handler;
+	
 	private int player_anim = RUN_ANIM, anim_state = 0, anim_tick, anim_speed = 30;
 	private int draw_offset_width = (int)(16 * Game.SCALE);
 		
 	private boolean jump, inAir;
-	private float jump_force = -4f * Game.SCALE, air_speed = 0, gravity = 0.1f, fall_speed = 0.1f;
-	private int shoot_time = Game.UPS_SET * 4;
+	private float jump_force = -4f * Game.SCALE, air_speed = 0, gravity = 0.1f, fall_speed = 0.5f;
+	private float laser_alpha = 0, laser_vanish_speed = 0.01f;
+	
+	private int shoot_time = Game.UPS_SET * 2;
 	
 	public Player(int x, int y, LevelGenerator level_gen) {
 		super(x, y, level_gen);
@@ -31,18 +37,28 @@ public class Player extends Entity implements Shootable{
 		shoot_handler = new ShootingHandler(shoot_time, this);
 		
 		hitBoxInit(x, y, (int)(30 * Game.SCALE), (int)(64 * Game.SCALE));
+		//laser_beam = new Rectangle2D.Float(0, 0, Game.GAME_WIDTH, 2);
 		animInit();
 	}
 	
 	public void update() {
 		animUpdate();
 		posUpdate();
+		updateLaser();
 		shoot_handler.shootUpdate();
 	}
 	
 	public void render(Graphics g) {
+		// Player render
 		g.drawImage(player[player_anim][anim_state], (int)hit_box.x - draw_offset_width, (int)hit_box.y, Game.TILES_SIZE * 2, Game.TILES_SIZE * 2, null);
 		//drawHitBox(g);
+		
+		// Laser bean render
+		Graphics2D g2 = (Graphics2D) g;
+		g2.setColor(Color.WHITE);
+		g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, laser_alpha));
+		g2.fillRect((int)(hit_box.x + hit_box.width), (int)(hit_box.y + hit_box.height/2), Game.GAME_WIDTH, 3);
+		
 	}
 	
 	public void setJump(boolean state) {
@@ -56,28 +72,55 @@ public class Player extends Entity implements Shootable{
 	@Override
 	public void shoot() {
 		System.out.println("Shoot!");
+		laser_alpha = 1f;
+	}
+	
+	private void updateLaser() {
+		if(laser_alpha <= 0.1f) {
+			laser_alpha = 0f;
+		}else
+			laser_alpha -= laser_vanish_speed;
 	}
 	
 	private void posUpdate() {
 		ChunkPlatform plt = getPlatform(this, level_gen);
 		
-		if(!isOnGround(this, plt)) {
-			inAir = true;	
+		if(inAir) {
 			animSet(JUMP_ANIM);
+			air_speed += gravity;
+
+		}else {
+			air_speed = 0;
+			animSet(RUN_ANIM);
+		}
+		
+		if(!isOnFloor(hit_box)) {
 			
-			//Check collision with left side of platform or with bottom of platform
-			if(isCollide(hit_box.x, hit_box.y, plt.getX(), plt.getY(), plt.getSize()) || isCollide(plt.getY(), plt.getX() - 1, hit_box.y, hit_box.x, (int)hit_box.height)) {
-				air_speed = fall_speed;
+			if (isTopCollision(hit_box, plt)) {
+			    // Player lands on top of platform
 				hit_box.y = getEntityVerticalePos(hit_box, air_speed);
-			}else {
-				air_speed += gravity;
+				hit_box.y = plt.getY() - Game.TILES_SIZE * 2;
+			    inAir = false;
+			    animSet(RUN_ANIM);
+			}
+			else if (isBottomCollision(hit_box, plt)) {
+			    // Player hits bottom of platform while jumping
+				hit_box.y = plt.getY() + Game.TILES_SIZE + 1;
+			    air_speed += fall_speed;
+			}
+			else if (isLeftCollision(hit_box, plt)) {
+			    // Player collides with left side of platform
+			    level_gen.levelStop();
+			    air_speed += gravity;
+			}
+			else {
+			    level_gen.levelStart();
+			    inAir = true;
 			}
 		}
 		else {
 			inAir = false;
-			air_speed = 0;
-			animSet(RUN_ANIM);
-			hit_box.y = getEntityVerticalePos(hit_box, air_speed);
+			hit_box.y = (int)(Game.GAME_HEIGHT - hit_box.height - Game.TILES_SIZE);
 		}
 		
 		if(jump)

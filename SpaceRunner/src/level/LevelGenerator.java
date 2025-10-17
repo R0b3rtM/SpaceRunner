@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+import items.ItemsGenerator;
 import main.Game;
 import utilities.LoadSprite;
 
@@ -12,6 +13,7 @@ public class LevelGenerator {
 	private Random rnd;
 	private BufferedImage[] level_tiles;
 	private ChunkPlatform collision_plt;
+	private ItemsGenerator items_gen;
 	
 	private ChunkPlatform head_chunk;
 	private ChunkPlatform tail_chunk;
@@ -23,9 +25,9 @@ public class LevelGenerator {
 	private static final int MAX_PLT_HEIGHT = 10;
 	private static final int MIN_PLT_HEIGHT = 6;
 	
-	private float level_speed = 1;
+	private int level_speed = 1;
 	private int floor_cnt = 0;
-	private int plt_spwn_sec = 4;
+	private int plt_spwn_sec = 2;
 	private int update_tick = 0;
 	
 	public LevelGenerator() {
@@ -38,6 +40,10 @@ public class LevelGenerator {
 			collision_plt = head_chunk;
 		
 		return collision_plt;
+	}
+	
+	public FloorPlatform getFloorPlt() {
+		return head_floor;
 	}
 	
 	public void setCollisionPlt() {
@@ -55,6 +61,12 @@ public class LevelGenerator {
 		
 		// Platform movement.
 		movePlatforms();
+		
+		// Items logic
+		items_gen.spawnItems();
+		items_gen.itemsMove(level_speed);
+		items_gen.itemsAnim();
+		
 	}
 
 	public void render(Graphics g) {
@@ -72,6 +84,16 @@ public class LevelGenerator {
 				g.drawImage(curr_plt.getPltTile(i), (int)curr_plt.getX() + (i * Game.TILES_SIZE), (int)curr_plt.getY(), Game.TILES_SIZE, Game.TILES_SIZE, null);
 			}
 		}
+		
+		items_gen.itemsRender(g);
+	}
+	
+	public void levelStop() {
+		level_speed = 0;
+	}
+	
+	public void levelStart() {
+		level_speed = 1;
 	}
 	
 	private void movePlatforms() {
@@ -126,7 +148,7 @@ public class LevelGenerator {
 	}
 	
 	private void spawnFloor() {
-		float new_pos_x = head_floor.getX() + Game.GAME_WIDTH;
+		int new_pos_x = head_floor.getX() + Game.GAME_WIDTH;
 		FloorPlatform new_plt = new FloorPlatform(new_pos_x, Game.GAME_HEIGHT - Game.TILES_SIZE, Game.TILES_IN_WIDTH, level_tiles);
 		
 		// Add platform to a linked list.
@@ -157,6 +179,9 @@ public class LevelGenerator {
 		head_floor = new FloorPlatform(0, Game.GAME_HEIGHT - Game.TILES_SIZE, Game.TILES_IN_WIDTH, level_tiles);
 		tail_floor = head_floor;
 		floor_cnt++;
+		
+		// Items generator
+		items_gen = new ItemsGenerator();
 
 	}
 	
@@ -166,9 +191,9 @@ public class LevelGenerator {
 		}
 	}
 	
-	private void drawAllTiles_debug(Graphics g) {
-		for(int i=0; i<level_tiles.length; i++) {
-			g.drawImage(level_tiles[i], i*Game.TILES_SIZE, 0, Game.TILES_SIZE, Game.TILES_SIZE, null);
-		}
-	}
+//	private void drawAllTiles_debug(Graphics g) {
+//		for(int i=0; i<level_tiles.length; i++) {
+//			g.drawImage(level_tiles[i], i*Game.TILES_SIZE, 0, Game.TILES_SIZE, Game.TILES_SIZE, null);
+//		}
+//	}
 }

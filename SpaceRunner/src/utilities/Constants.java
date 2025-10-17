@@ -10,4 +10,9 @@ public class Constants {
 		public static final int ANIM_AMOUNT = 4;
 		public static final int ANIM_FRAMES = 3;
 	}
+	
+	public static class ItemsConstants {
+		public static final int HEART_ID = 0;
+		public static final int COIN_ID = 1;
+	}
 }

@@ -1,5 +1,6 @@
 package main;
 
+import java.awt.Color;
 import java.awt.Graphics;
 
 import entities.Player;
@@ -24,6 +25,7 @@ public class Game implements Runnable{
 	public final static int TILES_SIZE = (int) (TILES_DEFAULT_SIZE * SCALE);
 	public final static int GAME_WIDTH = TILES_SIZE * TILES_IN_WIDTH;
 	public final static int GAME_HEIGHT = TILES_SIZE * TILES_IN_HEIGHT;
+	public final static Color GAME_BACKGROUND = new Color(38, 35, 66);
 	
 	public Game() {
 		level_gen = new LevelGenerator();
@@ -33,6 +35,9 @@ public class Game implements Runnable{
 		
 		// Requests a keyboard focus to the panel.  
 		game_panel.requestFocus();
+		
+		game_panel.setBackground(GAME_BACKGROUND);
+		
 		start_game();
 	}
 	

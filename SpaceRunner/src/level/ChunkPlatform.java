@@ -6,7 +6,7 @@ public class ChunkPlatform extends Platform{
 	
 	private ChunkPlatform next_plt = null;
 	
-	public ChunkPlatform(float x, float y, int size, BufferedImage[] level_plts) {
+	public ChunkPlatform(int x, int y, int size, BufferedImage[] level_plts) {
 		super(x, y, size, level_plts);
 		
 		platformInit();

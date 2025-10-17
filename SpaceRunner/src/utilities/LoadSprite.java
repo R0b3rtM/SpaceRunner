@@ -12,6 +12,8 @@ public class LoadSprite {
 	
 	public static final String PLAYER_SPRITE = "Player.png";
 	public static final String TILES_SPRITE = "Tiles.png";
+	public static final String HEART_SPRITE = "Heart.png";
+	public static final String COIN_SPRITE = "Coin.png";
 	
 	public static BufferedImage LoadSpriteImg(String sprite_url) {
 		

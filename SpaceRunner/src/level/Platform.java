@@ -8,10 +8,10 @@ public class Platform {
 	protected BufferedImage[] plt_tiles;
 	
 	protected int size;
-	protected float x;
-	protected float y;
+	protected int x;
+	protected int y;
 	
-	public Platform(float x, float y, int size, BufferedImage[] level_plts) {
+	public Platform(int x, int y, int size, BufferedImage[] level_plts) {
 		this.size = size;
 		this.x = x;
 		this.y = y;
@@ -27,15 +27,19 @@ public class Platform {
 		return plt_tiles[i];
 	}
 	
-	public float getX() {
+	public void setX(int x) {
+		this.x = x;
+	}
+	
+	public int getX() {
 		return this.x;
 	}
 	
-	public float getY() {
+	public int getY() {
 		return this.y;
 	}
 	
-	public void updatePosX(float x) {
+	public void updatePosX(int x) {
 		this.x -= x;
 	}
 	

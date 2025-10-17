@@ -6,7 +6,7 @@ public class FloorPlatform extends Platform{
 	
 	private FloorPlatform next_plt = null;
 	
-	public FloorPlatform(float x, float y, int size, BufferedImage[] level_plts) {
+	public FloorPlatform(int x, int y, int size, BufferedImage[] level_plts) {
 		super(x, y, size, level_plts);
 		
 		floorInit();

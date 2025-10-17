@@ -14,24 +14,21 @@ public class Collisions {
 		
 		if(air_speed > 0) {
 			//Falling
-			int tile_y_pos = curr_tile * Game.TILES_SIZE;
+			int tile_y_pos = (curr_tile + 1) * Game.TILES_SIZE;
 			
-			return tile_y_pos + Game.TILES_SIZE;
+			return tile_y_pos;
 		}else {
 			//Jumping
 			return curr_tile * Game.TILES_SIZE;
 		}
 	}
 	
-	public static boolean isOnGround(Player player, ChunkPlatform plt) {
-		Rectangle2D.Float hit_box = player.getHitBox();
+	// Checks if the player is on the floor of the level
+	public static boolean isOnFloor(Rectangle2D.Float hit_box) {
+		int bottom_y = (int)((hit_box.y + hit_box.height) / Game.TILES_SIZE);
+		int level_floor = (int)((Game.GAME_HEIGHT - Game.TILES_DEFAULT_SIZE) / Game.TILES_SIZE);
 		
-		// Check if the player on the floor of the level
-		if(isOnFloor(hit_box))
-			return true;
-		
-		//Check if the player on a platform
-		if (isCollide(hit_box.x, hit_box.y + hit_box.height, plt.getX(), plt.getY(), plt.getSize()))
+		if(bottom_y == level_floor)
 			return true;
 		
 		return false;
@@ -54,31 +51,61 @@ public class Collisions {
 
 	}
 	
-	public static boolean isCollide(float x, float y, float plt_x, float plt_y, int size) {
-		int tile_x = (int)(x / Game.TILES_SIZE);
-		int tile_y = (int)(y / Game.TILES_SIZE);
-		
-		int plt_tile_x = (int)(plt_x / Game.TILES_SIZE);
-		int plt_tile_y = (int)(plt_y / Game.TILES_SIZE);
-		
-		if(tile_x >= plt_tile_x && tile_x < plt_tile_x + size) {
-			if(tile_y == plt_tile_y) {
-				return true;
-			}
-		}
-		
-		return false;
+	public static boolean isBottomCollision(Rectangle2D.Float playerBox, ChunkPlatform plt) {
+	    float player_top = playerBox.y;
+	    float player_bottom = playerBox.y + playerBox.height;
+	    float player_left = playerBox.x;
+	    float player_right = playerBox.x + playerBox.width;
+
+	    float plt_top = plt.getY();
+	    float plt_bottom = plt.getY() + Game.TILES_SIZE;
+	    float plt_left = plt.getX();
+	    float plt_right = plt.getX() + plt.getSize() * Game.TILES_SIZE;
+
+	    // Overlapping horizontally
+	    boolean horizontallyAligned = player_right > plt_left && player_left < plt_right;
+
+	    // Player’s top near platform’s bottom
+	    boolean verticallyTouching = player_top <= plt_bottom + 2 && player_bottom > plt_bottom;
+
+	    return horizontallyAligned && verticallyTouching;
 	}
 	
-	// Checks if the player is on the floor of the level
-	private static boolean isOnFloor(Rectangle2D.Float hit_box) {
-		int bottom_y = (int)((hit_box.y + hit_box.height) / Game.TILES_SIZE);
-		int level_floor = (int)((Game.GAME_HEIGHT - Game.TILES_DEFAULT_SIZE) / Game.TILES_SIZE);
-		
-		if(bottom_y == level_floor)
-			return true;
-		
-		return false;
+	public static boolean isTopCollision(Rectangle2D.Float playerBox, ChunkPlatform plt) {
+	    float player_top = playerBox.y;
+	    float player_bottom = playerBox.y + playerBox.height;
+	    float player_left = playerBox.x;
+	    float player_right = playerBox.x + playerBox.width;
+
+	    float plt_top = plt.getY();
+	    float plt_bottom = plt.getY() + Game.TILES_SIZE;
+	    float plt_left = plt.getX();
+	    float plt_right = plt.getX() + plt.getSize() * Game.TILES_SIZE;
+
+	    // Overlapping horizontally
+	    boolean horizontallyAligned = player_right > plt_left && player_left < plt_right;
+
+	    // Player’s bottom near platform’s top
+	    boolean verticallyTouching = player_bottom >= player_top - 2 && player_top < plt_top;
+
+	    return horizontallyAligned && verticallyTouching;
+	}
+	
+	public static boolean isLeftCollision(Rectangle2D.Float playerBox, ChunkPlatform plt) {
+	    float player_top = playerBox.y;
+	    float player_bottom = playerBox.y + playerBox.height;
+	    float player_left = playerBox.x;
+	    float player_right = playerBox.x + playerBox.width;
+
+	    float plt_top = plt.getY();
+	    float plt_bottom = plt.getY() + Game.TILES_SIZE;
+	    float plt_left = plt.getX();
+	    float plt_right = plt.getX() + plt.getSize() * Game.TILES_SIZE;
+
+	    boolean horizontallyAligned = player_right >= plt_left && player_left < plt_left;
+	    boolean verticallyAligned = player_bottom > plt_top && player_top < plt_bottom;
+
+	    return horizontallyAligned && verticallyAligned;
 	}
 	
 }
