@@ -86,7 +86,7 @@ public class Collisions {
 	    boolean horizontallyAligned = player_right > plt_left && player_left < plt_right;
 
 	    // Player’s bottom near platform’s top
-	    boolean verticallyTouching = player_bottom >= player_top - 2 && player_top < plt_top;
+	    boolean verticallyTouching = player_bottom >= plt_top - 2 && player_top < plt_top;
 
 	    return horizontallyAligned && verticallyTouching;
 	}

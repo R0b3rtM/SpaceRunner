@@ -7,7 +7,7 @@ import main.Game;
 
 public class ItemsGenerator {
 	
-	private Item head, tail;
+	private Item head, tail, curr_item;
 	private int item_spawn_time = Game.UPS_SET * 2, spawn_tick = 0;
 	
 	private int max_y_pos = 13, min_y_pos = 10;
@@ -18,27 +18,15 @@ public class ItemsGenerator {
 		this.tail = null;
 	}
 	
-	public ItemsGenerator(Item head) {
-		this.head = head;
-		this.tail = head;
-	}
-	
-	public void setHead(Item head) {
-		this.head = head;
-		if(this.tail == null)
-			this.tail = head;
-	}
-	
 	public void spawnItems() {
 		if(spawn_tick >= item_spawn_time) {
-			Item new_item = new Item(Game.GAME_WIDTH - Game.TILES_SIZE*2, (rnd.nextInt(max_y_pos - min_y_pos) + min_y_pos) * Game.TILES_SIZE, rnd.nextInt(1) + 1);
+			Item new_item = new Item(Game.GAME_WIDTH - Game.TILES_SIZE*2, (rnd.nextInt(max_y_pos - min_y_pos) + min_y_pos) * Game.TILES_SIZE, rnd.nextInt(2));
 			if(head == null) {
 				head = new_item;
 				tail = head;
 			}
 			else {
-				System.out.println("Item spawned");
-				tail = tail.getNextItem();
+				tail.setNextItem(new_item);
 				tail = new_item;
 			}
 			spawn_tick = 0;	

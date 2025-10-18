@@ -10,6 +10,7 @@ import level.ChunkPlatform;
 import level.LevelGenerator;
 
 import main.Game;
+import utilities.HUD;
 import utilities.LoadSprite;
 import utilities.Shootable;
 import utilities.ShootingHandler;
@@ -21,6 +22,7 @@ public class Player extends Entity implements Shootable{
 	
 	private BufferedImage[][] player;
 	private ShootingHandler shoot_handler;
+	private HUD hud;
 	
 	private int player_anim = RUN_ANIM, anim_state = 0, anim_tick, anim_speed = 30;
 	private int draw_offset_width = (int)(16 * Game.SCALE);
@@ -30,6 +32,7 @@ public class Player extends Entity implements Shootable{
 	private float laser_alpha = 0, laser_vanish_speed = 0.01f;
 	
 	private int shoot_time = Game.UPS_SET * 2;
+	private int player_lives = 3;
 	
 	public Player(int x, int y, LevelGenerator level_gen) {
 		super(x, y, level_gen);
@@ -37,8 +40,9 @@ public class Player extends Entity implements Shootable{
 		shoot_handler = new ShootingHandler(shoot_time, this);
 		
 		hitBoxInit(x, y, (int)(30 * Game.SCALE), (int)(64 * Game.SCALE));
-		//laser_beam = new Rectangle2D.Float(0, 0, Game.GAME_WIDTH, 2);
 		animInit();
+		
+		hud = new HUD();
 	}
 	
 	public void update() {
@@ -53,12 +57,18 @@ public class Player extends Entity implements Shootable{
 		g.drawImage(player[player_anim][anim_state], (int)hit_box.x - draw_offset_width, (int)hit_box.y, Game.TILES_SIZE * 2, Game.TILES_SIZE * 2, null);
 		//drawHitBox(g);
 		
+		hud.renderHUD(g, player_lives);
+		
 		// Laser bean render
 		Graphics2D g2 = (Graphics2D) g;
 		g2.setColor(Color.WHITE);
 		g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, laser_alpha));
 		g2.fillRect((int)(hit_box.x + hit_box.width), (int)(hit_box.y + hit_box.height/2), Game.GAME_WIDTH, 3);
 		
+	}
+	
+	public void hurt() {
+		player_lives--;
 	}
 	
 	public void setJump(boolean state) {
@@ -88,18 +98,19 @@ public class Player extends Entity implements Shootable{
 		if(inAir) {
 			animSet(JUMP_ANIM);
 			air_speed += gravity;
-
-		}else {
-			air_speed = 0;
-			animSet(RUN_ANIM);
 		}
+		
+		if(jump)
+			jump();
+		
+		hit_box.y += air_speed;
 		
 		if(!isOnFloor(hit_box)) {
 			
 			if (isTopCollision(hit_box, plt)) {
 			    // Player lands on top of platform
-				hit_box.y = getEntityVerticalePos(hit_box, air_speed);
 				hit_box.y = plt.getY() - Game.TILES_SIZE * 2;
+				air_speed = 0;
 			    inAir = false;
 			    animSet(RUN_ANIM);
 			}
@@ -121,13 +132,11 @@ public class Player extends Entity implements Shootable{
 		else {
 			inAir = false;
 			hit_box.y = (int)(Game.GAME_HEIGHT - hit_box.height - Game.TILES_SIZE);
+			if(!jump) {
+				air_speed = 0;
+				animSet(RUN_ANIM);
+			}
 		}
-		
-		if(jump)
-			jump();
-		
-		hit_box.y += air_speed;
-		
 	}
 	
 	private void jump() {

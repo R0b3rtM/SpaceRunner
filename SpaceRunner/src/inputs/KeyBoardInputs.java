@@ -28,6 +28,9 @@ public class KeyBoardInputs implements KeyListener{
 		case KeyEvent.VK_SPACE:
 			game_panel.getGame().getPlayer().tryShoot();
 			break;
+		case KeyEvent.VK_ENTER:
+			game_panel.getGame().getPlayer().hurt();
+			break;
 		}
 		
 	}

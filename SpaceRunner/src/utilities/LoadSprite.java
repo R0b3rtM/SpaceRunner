@@ -1,5 +1,7 @@
 package utilities;
 
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,5 +34,11 @@ public class LoadSprite {
 	public static BufferedImage GetSubSprite(int i, int j, int width, int height, BufferedImage sprite) {
 		BufferedImage sub_sprite = sprite.getSubimage(i, j, width, height);
 		return sub_sprite;
+	}
+	
+	public static void LoadFont() {
+		Font customFont = Font.createFont(Font.TRUETYPE_FONT, new File("YourFont.ttf")).deriveFont(24f);
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		ge.registerFont(customFont);
 	}
 }
