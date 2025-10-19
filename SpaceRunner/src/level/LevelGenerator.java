@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+import items.Item;
 import items.ItemsGenerator;
 import main.Game;
 import utilities.LoadSprite;
@@ -30,9 +31,19 @@ public class LevelGenerator {
 	private int plt_spwn_sec = 2;
 	private int update_tick = 0;
 	
+	private boolean pause = false;
+	
 	public LevelGenerator() {
 		rnd = new Random();
 		levelInit();
+	}
+	
+	public Item getHeadItem() {
+		return items_gen.getHead();
+	}
+	
+	public void collectHeadItem() {
+		items_gen.removeHead();
 	}
 	
 	public ChunkPlatform getCollisionPlt() {
@@ -52,21 +63,22 @@ public class LevelGenerator {
 	
 	public void update() {
 		
-		// Platform chunks spawn.
-		if(update_tick >= plt_spwn_sec * Game.UPS_SET) {
-			update_tick = 0;
-			spawnChunk();
+		if(!pause) {
+			// Platform chunks spawn.
+			if(update_tick >= plt_spwn_sec * Game.UPS_SET) {
+				update_tick = 0;
+				spawnChunk();
+			}
+			update_tick++;
+			
+			// Platform movement.
+			movePlatforms();
+			
+			// Items logic
+			items_gen.spawnItems();
+			items_gen.itemsMove(level_speed);
+			items_gen.itemsAnim();
 		}
-		update_tick++;
-		
-		// Platform movement.
-		movePlatforms();
-		
-		// Items logic
-		items_gen.spawnItems();
-		items_gen.itemsMove(level_speed);
-		items_gen.itemsAnim();
-		
 	}
 
 	public void render(Graphics g) {
@@ -86,6 +98,10 @@ public class LevelGenerator {
 		}
 		
 		items_gen.itemsRender(g);
+	}
+	
+	public void setPause(boolean pause) {
+		this.pause = pause;
 	}
 	
 	public void levelStop() {
@@ -163,6 +179,7 @@ public class LevelGenerator {
 		int tiles_in_height = tiles_sprite.getHeight()/Game.TILES_DEFAULT_SIZE;
 		int tiles_index = 0;
 		
+		pause = true;
 		level_tiles = new BufferedImage[tiles_in_width * tiles_in_height];
 		
 		for(int j=0; j<tiles_in_height; j++) {
@@ -172,9 +189,9 @@ public class LevelGenerator {
 			}
 		}
 		
-		// First chunk spawn
+		// spawn first chunk
 		spawnChunk();
-		
+				
 		// Floor spawn
 		head_floor = new FloorPlatform(0, Game.GAME_HEIGHT - Game.TILES_SIZE, Game.TILES_IN_WIDTH, level_tiles);
 		tail_floor = head_floor;
@@ -185,10 +202,32 @@ public class LevelGenerator {
 
 	}
 	
+	public void levelReset() {
+		pause = true;
+		
+		if(head_chunk != null) {
+			//Delete all the chunk platforms
+			while(head_chunk != null) {
+				ChunkPlatform tmp = head_chunk.getNext();
+				head_chunk = null;
+				head_chunk = tmp;	
+			}
+			// Spawn the first chunk
+			spawnChunk();
+			
+			// Set the first platform chunk to the head
+			collision_plt = null;
+		}
+	}
+	
 	private void renderPlatform(Graphics g, Platform plt) {
 		for(int i=0; i<plt.getSize(); i++) {
 			g.drawImage(plt.getPltTile(i), (int)plt.getX() + (i * Game.TILES_SIZE), (int)plt.getY(), Game.TILES_SIZE, Game.TILES_SIZE, null);
 		}
+	}
+
+	public boolean getPause() {
+		return pause;
 	}
 	
 //	private void drawAllTiles_debug(Graphics g) {
@@ -196,4 +235,5 @@ public class LevelGenerator {
 //			g.drawImage(level_tiles[i], i*Game.TILES_SIZE, 0, Game.TILES_SIZE, Game.TILES_SIZE, null);
 //		}
 //	}
+	
 }

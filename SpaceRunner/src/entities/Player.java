@@ -6,10 +6,12 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
+import items.Item;
 import level.ChunkPlatform;
 import level.LevelGenerator;
 
 import main.Game;
+import utilities.Constants;
 import utilities.HUD;
 import utilities.LoadSprite;
 import utilities.Shootable;
@@ -22,9 +24,8 @@ public class Player extends Entity implements Shootable{
 	
 	private BufferedImage[][] player;
 	private ShootingHandler shoot_handler;
-	private HUD hud;
 	
-	private int player_anim = RUN_ANIM, anim_state = 0, anim_tick, anim_speed = 30;
+	private int player_anim = IDLE_ANIM, anim_state = 0, anim_tick, anim_speed = 30;
 	private int draw_offset_width = (int)(16 * Game.SCALE);
 		
 	private boolean jump, inAir;
@@ -32,33 +33,37 @@ public class Player extends Entity implements Shootable{
 	private float laser_alpha = 0, laser_vanish_speed = 0.01f;
 	
 	private int shoot_time = Game.UPS_SET * 2;
-	private int player_lives = 3;
+	private int lives = 2, coins = 0;
+	private boolean player_died;
 	
 	public Player(int x, int y, LevelGenerator level_gen) {
 		super(x, y, level_gen);
 		player = new BufferedImage[ANIM_AMOUNT][ANIM_FRAMES];
 		shoot_handler = new ShootingHandler(shoot_time, this);
 		
-		hitBoxInit(x, y, (int)(30 * Game.SCALE), (int)(64 * Game.SCALE));
+		hitBoxInit((int)x, (int)y, (int)(30 * Game.SCALE), (int)(64 * Game.SCALE));
 		animInit();
-		
-		hud = new HUD();
 	}
 	
 	public void update() {
 		animUpdate();
+		itemsCollect();
+		playerDeath();
 		posUpdate();
-		updateLaser();
-		shoot_handler.shootUpdate();
+		
+		// Player logic and HUD set
+		if(!player_died) {
+			if(!level_gen.getPause()) {
+				updateLaser();
+				shoot_handler.shootUpdate();
+			}
+		}
 	}
 	
 	public void render(Graphics g) {
 		// Player render
 		g.drawImage(player[player_anim][anim_state], (int)hit_box.x - draw_offset_width, (int)hit_box.y, Game.TILES_SIZE * 2, Game.TILES_SIZE * 2, null);
 		//drawHitBox(g);
-		
-		hud.renderHUD(g, player_lives);
-		
 		// Laser bean render
 		Graphics2D g2 = (Graphics2D) g;
 		g2.setColor(Color.WHITE);
@@ -67,8 +72,37 @@ public class Player extends Entity implements Shootable{
 		
 	}
 	
+	public void playerReset() {
+		lives = 3;
+		player_died = false;
+		animSet(IDLE_ANIM);
+	}
+	
+	public int getCoins() {
+		return coins;
+	}
+	
+	public int getLives() {
+		return lives;
+	}
+	
 	public void hurt() {
-		player_lives--;
+		lives--;
+	}
+	
+	public void addCoin() {
+		coins++;
+	}
+	
+	public void addLives() {
+		if(lives == 3)
+			return;
+		
+		lives++;
+	}
+	
+	public boolean getCondition() {
+		return player_died;
 	}
 	
 	public void setJump(boolean state) {
@@ -76,7 +110,8 @@ public class Player extends Entity implements Shootable{
 	}
 	
 	public void tryShoot() {
-		shoot_handler.tryShoot();
+		if(!player_died)
+			shoot_handler.tryShoot();
 	}
 	
 	@Override
@@ -85,11 +120,37 @@ public class Player extends Entity implements Shootable{
 		laser_alpha = 1f;
 	}
 	
+	private void playerDeath() {
+		if(player_died) return;
+		if(lives <= 0) {
+			// Pause the game
+			level_gen.setPause(true);
+			animSet(DEATH_ANIM);
+			player_died = true;
+		}
+	}
+	
 	private void updateLaser() {
 		if(laser_alpha <= 0.1f) {
 			laser_alpha = 0f;
 		}else
 			laser_alpha -= laser_vanish_speed;
+	}
+	
+	private void itemsCollect() {
+		Item curr_item = level_gen.getHeadItem();
+		if(curr_item == null) return;
+		if(itemCollision(hit_box, curr_item)) {
+			switch (curr_item.getItemType()) {
+			case Constants.ItemsConstants.HEART_ID:
+				addLives();
+				break;
+			case Constants.ItemsConstants.COIN_ID:
+				addCoin();
+				break;
+			}
+			level_gen.collectHeadItem();
+		}
 	}
 	
 	private void posUpdate() {
@@ -140,17 +201,24 @@ public class Player extends Entity implements Shootable{
 	}
 	
 	private void jump() {
-		if(inAir)
+		if(inAir || player_died)
 			return;
 		inAir = true;
 		air_speed = jump_force;
 	}
 	
 	private void animSet(int anim) {
-		if(anim == player_anim)
+		
+		// Avoid setting other animations while player died or reseting the same animation
+		if(anim == player_anim || player_died)
 			return;
-		anim_state = 0;
+		
+		// Avoid setting other animations while in start menu
+		if(player_anim == IDLE_ANIM && level_gen.getPause())
+			return;
+		
 		player_anim = anim;
+		anim_state = 0;
 	}
 	
 	private void animUpdate() {
@@ -159,10 +227,13 @@ public class Player extends Entity implements Shootable{
 			anim_state++;
 			anim_tick = 0;
 			
-			if(anim_state >= ANIM_FRAMES && player_anim != JUMP_ANIM)
-				anim_state = 0;
-			else if(player_anim == JUMP_ANIM)
-				anim_state = ANIM_FRAMES-1;
+			if(anim_state >= ANIM_FRAMES) {
+				if(player_anim == JUMP_ANIM || player_anim == DEATH_ANIM) {
+					anim_state = ANIM_FRAMES-1;
+				}else {
+					anim_state = 0;
+				}
+			}	
 		}
 		anim_tick++;
 	}

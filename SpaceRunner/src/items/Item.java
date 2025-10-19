@@ -34,8 +34,16 @@ public class Item {
 		return nextItem;
 	}
 	
-	public BufferedImage getItemSprite() {
-		return sprite;
+	public int getItemType() {
+		return this.type;
+	}
+	
+	public int getX() {
+		return this.x;
+	}
+	
+	public int getY() {
+		return this.y;
 	}
 	
 	public void itemPosUpdate(int x) {

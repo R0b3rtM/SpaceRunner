@@ -5,6 +5,9 @@ import java.awt.Graphics;
 
 import entities.Player;
 import level.LevelGenerator;
+import utilities.HUD;
+
+import static utilities.Constants.HUDConstants.*;
 
 public class Game implements Runnable{
 	
@@ -12,6 +15,7 @@ public class Game implements Runnable{
 	private GamePanel game_panel;
 	private LevelGenerator level_gen;
 	private Player player;
+	private HUD hud;
 	
 	public static final int FPS_SET = 120;
 	public static final int UPS_SET = 200;
@@ -27,17 +31,20 @@ public class Game implements Runnable{
 	public final static int GAME_HEIGHT = TILES_SIZE * TILES_IN_HEIGHT;
 	public final static Color GAME_BACKGROUND = new Color(38, 35, 66);
 	
+	public final static int MENU_STATE = 0;
+	public final static int PLAY_STATE = 1;
+	public final static int DEATH_STATE = 2;
+	private int game_state = MENU_STATE;
+	
 	public Game() {
 		level_gen = new LevelGenerator();
 		player = new Player(200, 200, level_gen);
 		game_panel = new GamePanel(this);
 		game_window =  new GameWindow(game_panel);
 		
-		// Requests a keyboard focus to the panel.  
 		game_panel.requestFocus();
 		
 		game_panel.setBackground(GAME_BACKGROUND);
-		
 		start_game();
 	}
 	
@@ -47,7 +54,26 @@ public class Game implements Runnable{
 	
 	public void render(Graphics g) {
 		level_gen.render(g);
+		
+		if(hud != null) {
+			setGameHUD();
+			hud.renderHUD(g, player.getLives(), player.getCoins());
+		}
+		
 		player.render(g);
+	}
+	
+	public void setPause(boolean state) {
+		level_gen.setPause(state);
+	}
+	
+	public int getGameState() {
+		return game_state;
+	}
+	
+	public void restartGame() {
+		level_gen.levelReset();
+		player.playerReset();
 	}
 	
 	private void update() {
@@ -56,8 +82,25 @@ public class Game implements Runnable{
 	}
 	
 	private void start_game() {
+		hud = new HUD();
+		
 		game_thread = new Thread(this);
 		game_thread.start();
+	}
+	
+	private void setGameHUD() {
+		if(!player.getCondition()) {
+			if(level_gen.getPause()) {
+				hud.setHUD(MAIN_HUD);
+				game_state = MENU_STATE;
+			}else {
+				hud.setHUD(PLAY_HUD);
+				game_state = PLAY_STATE;
+			}
+		}else {
+			hud.setHUD(DEATH_HUD);
+			game_state = DEATH_STATE;
+		}
 	}
 
 	@Override

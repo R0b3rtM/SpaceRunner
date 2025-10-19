@@ -3,25 +3,12 @@ package utilities;
 import java.awt.geom.Rectangle2D;
 
 import entities.Player;
+import items.Item;
 import level.ChunkPlatform;
 import level.LevelGenerator;
 import main.Game;
 
 public class Collisions {
-	
-	public static float getEntityVerticalePos(Rectangle2D.Float hit_box, float air_speed) {
-		int curr_tile = (int)(hit_box.y / Game.TILES_SIZE);
-		
-		if(air_speed > 0) {
-			//Falling
-			int tile_y_pos = (curr_tile + 1) * Game.TILES_SIZE;
-			
-			return tile_y_pos;
-		}else {
-			//Jumping
-			return curr_tile * Game.TILES_SIZE;
-		}
-	}
 	
 	// Checks if the player is on the floor of the level
 	public static boolean isOnFloor(Rectangle2D.Float hit_box) {
@@ -48,7 +35,10 @@ public class Collisions {
 		}
 		
 		return plt;
-
+	}
+	
+	public static boolean itemCollision(Rectangle2D.Float hit_box, Item item) {
+	    return hit_box.intersects(item.getX(), item.getY(), Game.TILES_SIZE, Game.TILES_SIZE);
 	}
 	
 	public static boolean isBottomCollision(Rectangle2D.Float playerBox, ChunkPlatform plt) {

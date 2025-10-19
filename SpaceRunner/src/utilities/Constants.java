@@ -15,4 +15,10 @@ public class Constants {
 		public static final int HEART_ID = 0;
 		public static final int COIN_ID = 1;
 	}
+	
+	public static class HUDConstants {
+		public static final int MAIN_HUD = 0;
+		public static final int PLAY_HUD = 1;
+		public static final int DEATH_HUD = 2;
+	}
 }

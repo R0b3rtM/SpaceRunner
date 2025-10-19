@@ -1,6 +1,7 @@
 package utilities;
 
 import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -36,9 +37,19 @@ public class LoadSprite {
 		return sub_sprite;
 	}
 	
-	public static void LoadFont() {
-		Font customFont = Font.createFont(Font.TRUETYPE_FONT, new File("YourFont.ttf")).deriveFont(24f);
-		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		ge.registerFont(customFont);
+	public static Font LoadFont() {
+		
+		try (InputStream is = LoadSprite.class.getResourceAsStream("/MedodicaRegular.otf")){
+			if(is == null) {
+				System.out.println("Failed to find font file.");
+			}
+			Font game_font = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(48f);
+			return game_font;
+			
+		} catch (IOException | FontFormatException e) {
+			System.out.println(e.getMessage());
+			return null;
+		}
+		
 	}
 }

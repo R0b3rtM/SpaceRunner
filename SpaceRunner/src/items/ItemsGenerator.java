@@ -7,7 +7,7 @@ import main.Game;
 
 public class ItemsGenerator {
 	
-	private Item head, tail, curr_item;
+	private Item head, tail;
 	private int item_spawn_time = Game.UPS_SET * 2, spawn_tick = 0;
 	
 	private int max_y_pos = 13, min_y_pos = 10;
@@ -16,6 +16,16 @@ public class ItemsGenerator {
 	public ItemsGenerator() {
 		this.head = null;
 		this.tail = null;
+	}
+	
+	public void removeHead() {
+		Item temp = head;
+		head = head.getNextItem();
+		temp = null;
+	}
+	
+	public Item getHead() {
+		return head;
 	}
 	
 	public void spawnItems() {
@@ -37,6 +47,10 @@ public class ItemsGenerator {
 	public void itemsMove(int level_speed) {
 		if(head != null) {
 			Item curr_item = head;
+			if(curr_item.getX() < 0) {
+				removeHead();
+				curr_item = head;
+			}
 			for(;curr_item != null ; curr_item = curr_item.getNextItem()) {
 				curr_item.itemPosUpdate(level_speed);
 			}
