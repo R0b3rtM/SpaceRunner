@@ -11,9 +11,10 @@ import javax.imageio.ImageIO;
 
 import main.Game;
 
-public class LoadSprite {
+public class LoadAssets {
 	
 	public static final String PLAYER_SPRITE = "Player.png";
+	public static final String ALIEN_SPRITE = "Alien.png";
 	public static final String TILES_SPRITE = "Tiles.png";
 	public static final String HEART_SPRITE = "Heart.png";
 	public static final String COIN_SPRITE = "Coin.png";
@@ -21,7 +22,7 @@ public class LoadSprite {
 	public static BufferedImage LoadSpriteImg(String sprite_url) {
 		
 		BufferedImage sprite = null;
-		InputStream is = LoadSprite.class.getResourceAsStream("/" + sprite_url);
+		InputStream is = LoadAssets.class.getResourceAsStream("/" + sprite_url);
 		
 		try {
 			sprite = ImageIO.read(is);
@@ -39,7 +40,7 @@ public class LoadSprite {
 	
 	public static Font LoadFont() {
 		
-		try (InputStream is = LoadSprite.class.getResourceAsStream("/MedodicaRegular.otf")){
+		try (InputStream is = LoadAssets.class.getResourceAsStream("/MedodicaRegular.otf")){
 			if(is == null) {
 				System.out.println("Failed to find font file.");
 			}

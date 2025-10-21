@@ -9,6 +9,19 @@ public class Constants {
 		
 		public static final int ANIM_AMOUNT = 4;
 		public static final int ANIM_FRAMES = 3;
+		
+		public static final int MAX_LIVES = 3;
+	}
+	
+	public static class EnemyConstants {
+		public static final int ATTACK_ANIM = 0;
+		public static final int IDLE_ANIM = 1;
+		public static final int DEATH_ANIM = 2;
+		
+		public static final int ANIM_AMOUNT = 3;
+		public static final int ANIM_FRAMES = 4;
+		
+		public static final int MAX_LIVES = 5;
 	}
 	
 	public static class ItemsConstants {

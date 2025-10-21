@@ -12,8 +12,7 @@ import level.LevelGenerator;
 
 import main.Game;
 import utilities.Constants;
-import utilities.HUD;
-import utilities.LoadSprite;
+import utilities.LoadAssets;
 import utilities.Shootable;
 import utilities.ShootingHandler;
 
@@ -22,10 +21,9 @@ import static utilities.Collisions.*;
 
 public class Player extends Entity implements Shootable{
 	
-	private BufferedImage[][] player;
 	private ShootingHandler shoot_handler;
-	
-	private int player_anim = IDLE_ANIM, anim_state = 0, anim_tick, anim_speed = 30;
+	private LevelGenerator level_gen;
+		
 	private int draw_offset_width = (int)(16 * Game.SCALE);
 		
 	private boolean jump, inAir;
@@ -33,16 +31,20 @@ public class Player extends Entity implements Shootable{
 	private float laser_alpha = 0, laser_vanish_speed = 0.01f;
 	
 	private int shoot_time = Game.UPS_SET * 2;
-	private int lives = 2, coins = 0;
-	private boolean player_died;
+	private int coins = 0;
 	
 	public Player(int x, int y, LevelGenerator level_gen) {
-		super(x, y, level_gen);
-		player = new BufferedImage[ANIM_AMOUNT][ANIM_FRAMES];
+		super(x, y, MAX_LIVES);
+		
+		entity = new BufferedImage[ANIM_AMOUNT][ANIM_FRAMES];
+		sprite_url = LoadAssets.PLAYER_SPRITE;
 		shoot_handler = new ShootingHandler(shoot_time, this);
 		
+		this.level_gen = level_gen;
+		
+		animInit(ANIM_AMOUNT, ANIM_FRAMES);
+		animSet(IDLE_ANIM);
 		hitBoxInit((int)x, (int)y, (int)(30 * Game.SCALE), (int)(64 * Game.SCALE));
-		animInit();
 	}
 	
 	public void update() {
@@ -50,19 +52,14 @@ public class Player extends Entity implements Shootable{
 		itemsCollect();
 		playerDeath();
 		posUpdate();
+		updateLaser();
 		
-		// Player logic and HUD set
-		if(!player_died) {
-			if(!level_gen.getPause()) {
-				updateLaser();
-				shoot_handler.shootUpdate();
-			}
-		}
+		shoot_handler.shootUpdate();
 	}
 	
 	public void render(Graphics g) {
 		// Player render
-		g.drawImage(player[player_anim][anim_state], (int)hit_box.x - draw_offset_width, (int)hit_box.y, Game.TILES_SIZE * 2, Game.TILES_SIZE * 2, null);
+		g.drawImage(entity[entity_anim][anim_state], (int)hit_box.x - draw_offset_width, (int)hit_box.y, Game.TILES_SIZE * 2, Game.TILES_SIZE * 2, null);
 		//drawHitBox(g);
 		// Laser bean render
 		Graphics2D g2 = (Graphics2D) g;
@@ -73,8 +70,8 @@ public class Player extends Entity implements Shootable{
 	}
 	
 	public void playerReset() {
-		lives = 3;
-		player_died = false;
+		lives = MAX_LIVES;
+		entity_died = false;
 		animSet(IDLE_ANIM);
 	}
 	
@@ -102,7 +99,7 @@ public class Player extends Entity implements Shootable{
 	}
 	
 	public boolean getCondition() {
-		return player_died;
+		return entity_died;
 	}
 	
 	public void setJump(boolean state) {
@@ -110,7 +107,7 @@ public class Player extends Entity implements Shootable{
 	}
 	
 	public void tryShoot() {
-		if(!player_died)
+		if(!entity_died)
 			shoot_handler.tryShoot();
 	}
 	
@@ -120,13 +117,44 @@ public class Player extends Entity implements Shootable{
 		laser_alpha = 1f;
 	}
 	
+	private void animUpdate() {
+
+		if(anim_tick >= anim_speed) {
+			anim_state++;
+			anim_tick = 0;
+			
+			if(anim_state >= ANIM_FRAMES) {
+				if(entity_anim == JUMP_ANIM || entity_anim == DEATH_ANIM) {
+					anim_state = ANIM_FRAMES-1;
+				}else {
+					anim_state = 0;
+				}
+			}	
+		}
+		anim_tick++;
+	}
+	
+	private void animSet(int anim) {
+		
+		// Avoid setting other animations while player died or reseting the same animation
+		if(anim == entity_anim || entity_died)
+			return;
+		
+		// Avoid setting other animations while in start menu
+		if(entity_anim == IDLE_ANIM && level_gen.getPause())
+			return;
+		
+		entity_anim = anim;
+		anim_state = 0;
+	}
+	
 	private void playerDeath() {
-		if(player_died) return;
+		if(entity_died) return;
 		if(lives <= 0) {
 			// Pause the game
 			level_gen.setPause(true);
 			animSet(DEATH_ANIM);
-			player_died = true;
+			entity_died = true;
 		}
 	}
 	
@@ -201,50 +229,11 @@ public class Player extends Entity implements Shootable{
 	}
 	
 	private void jump() {
-		if(inAir || player_died)
+		if(inAir || entity_died)
 			return;
 		inAir = true;
 		air_speed = jump_force;
 	}
 	
-	private void animSet(int anim) {
-		
-		// Avoid setting other animations while player died or reseting the same animation
-		if(anim == player_anim || player_died)
-			return;
-		
-		// Avoid setting other animations while in start menu
-		if(player_anim == IDLE_ANIM && level_gen.getPause())
-			return;
-		
-		player_anim = anim;
-		anim_state = 0;
-	}
-	
-	private void animUpdate() {
 
-		if(anim_tick >= anim_speed) {
-			anim_state++;
-			anim_tick = 0;
-			
-			if(anim_state >= ANIM_FRAMES) {
-				if(player_anim == JUMP_ANIM || player_anim == DEATH_ANIM) {
-					anim_state = ANIM_FRAMES-1;
-				}else {
-					anim_state = 0;
-				}
-			}	
-		}
-		anim_tick++;
-	}
-	
-	private void animInit() {
-		BufferedImage player_sprite = LoadSprite.LoadSpriteImg(LoadSprite.PLAYER_SPRITE);
-		
-		for(int j=0; j<ANIM_AMOUNT; j++) {
-			for(int i=0; i<ANIM_FRAMES; i++) {
-				player[j][i] = LoadSprite.GetSubSprite(i * (Game.TILES_DEFAULT_SIZE * 2), j * (Game.TILES_DEFAULT_SIZE * 2),Game.TILES_DEFAULT_SIZE * 2, Game.TILES_DEFAULT_SIZE * 2, player_sprite);
-			}
-		}
-	}
 }

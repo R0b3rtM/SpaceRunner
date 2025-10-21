@@ -3,7 +3,9 @@ package main;
 import java.awt.Color;
 import java.awt.Graphics;
 
+import entities.Enemy;
 import entities.Player;
+import level.EnemyGenerator;
 import level.LevelGenerator;
 import utilities.HUD;
 
@@ -14,7 +16,9 @@ public class Game implements Runnable{
 	private GameWindow game_window;
 	private GamePanel game_panel;
 	private LevelGenerator level_gen;
+	private EnemyGenerator enemy_gen;
 	private Player player;
+	private Enemy curr_enemy;
 	private HUD hud;
 	
 	public static final int FPS_SET = 120;
@@ -39,6 +43,7 @@ public class Game implements Runnable{
 	public Game() {
 		level_gen = new LevelGenerator();
 		player = new Player(200, 200, level_gen);
+		enemy_gen = new EnemyGenerator(this);
 		game_panel = new GamePanel(this);
 		game_window =  new GameWindow(game_panel);
 		
@@ -60,6 +65,10 @@ public class Game implements Runnable{
 			hud.renderHUD(g, player.getLives(), player.getCoins());
 		}
 		
+		if(curr_enemy != null) {
+			curr_enemy.render(g);
+		}
+		
 		player.render(g);
 	}
 	
@@ -74,11 +83,18 @@ public class Game implements Runnable{
 	public void restartGame() {
 		level_gen.levelReset();
 		player.playerReset();
+		enemy_gen.enemyReset();
 	}
 	
 	private void update() {
 		level_gen.update();
 		player.update();
+		enemy_gen.update();
+		
+		curr_enemy = enemy_gen.getEnemy();
+		if(curr_enemy != null) {
+			curr_enemy.update();
+		}
 	}
 	
 	private void start_game() {

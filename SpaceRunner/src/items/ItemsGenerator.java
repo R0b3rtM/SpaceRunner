@@ -74,4 +74,15 @@ public class ItemsGenerator {
 			}
 		}
 	}
+
+	public void itemsRest() {
+		if(head != null) {
+			//Delete all the chunk platforms
+			while(head != null) {
+				Item tmp = head.getNextItem();
+				head = null;
+				head = tmp;	
+			}
+		}
+	}
 }

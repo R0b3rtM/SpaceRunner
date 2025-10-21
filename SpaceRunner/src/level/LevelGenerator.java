@@ -7,7 +7,7 @@ import java.util.Random;
 import items.Item;
 import items.ItemsGenerator;
 import main.Game;
-import utilities.LoadSprite;
+import utilities.LoadAssets;
 
 public class LevelGenerator {
 	
@@ -24,7 +24,7 @@ public class LevelGenerator {
 	private static final int MAX_PLT_SIZE = 4;
 	private static final int MIN_PLT_SIZE = 2;
 	private static final int MAX_PLT_HEIGHT = 10;
-	private static final int MIN_PLT_HEIGHT = 6;
+	private static final int MIN_PLT_HEIGHT = 7;
 	
 	private int level_speed = 1;
 	private int floor_cnt = 0;
@@ -104,12 +104,36 @@ public class LevelGenerator {
 		this.pause = pause;
 	}
 	
+	public boolean getPause() {
+		return pause;
+	}
+	
 	public void levelStop() {
 		level_speed = 0;
 	}
 	
 	public void levelStart() {
 		level_speed = 1;
+	}
+	
+	public void levelReset() {
+		pause = true;
+		
+		if(head_chunk != null) {
+			//Delete all the chunk platforms
+			while(head_chunk != null) {
+				ChunkPlatform tmp = head_chunk.getNext();
+				head_chunk = null;
+				head_chunk = tmp;	
+			}
+			// Spawn first chunk
+			spawnChunk();
+			
+			// Set the first platform chunk to the head
+			collision_plt = null;
+		}
+		
+		items_gen.itemsRest();
 	}
 	
 	private void movePlatforms() {
@@ -150,7 +174,7 @@ public class LevelGenerator {
 		int new_size = rnd.nextInt(MAX_PLT_SIZE) + MIN_PLT_SIZE;
 		int new_pos = (int)(rnd.nextInt(MAX_PLT_HEIGHT - MIN_PLT_HEIGHT) + MIN_PLT_HEIGHT) * Game.TILES_SIZE;
 		
-		ChunkPlatform new_plt = new ChunkPlatform(Game.GAME_WIDTH - (new_size * Game.TILES_SIZE), new_pos, new_size, level_tiles);
+		ChunkPlatform new_plt = new ChunkPlatform(Game.GAME_WIDTH , new_pos, new_size, level_tiles);
 		
 		// Add platform to a linked list.
 		if(head_chunk == null) {
@@ -174,7 +198,7 @@ public class LevelGenerator {
 	}
 	
 	private void levelInit() {
-		BufferedImage tiles_sprite = LoadSprite.LoadSpriteImg(LoadSprite.TILES_SPRITE);
+		BufferedImage tiles_sprite = LoadAssets.LoadSpriteImg(LoadAssets.TILES_SPRITE);
 		int tiles_in_width = tiles_sprite.getWidth()/Game.TILES_DEFAULT_SIZE;
 		int tiles_in_height = tiles_sprite.getHeight()/Game.TILES_DEFAULT_SIZE;
 		int tiles_index = 0;
@@ -184,7 +208,7 @@ public class LevelGenerator {
 		
 		for(int j=0; j<tiles_in_height; j++) {
 			for(int i=0; i<tiles_in_width; i++) {
-				level_tiles[tiles_index] = LoadSprite.GetSubSprite(i*Game.TILES_DEFAULT_SIZE, j*Game.TILES_DEFAULT_SIZE, Game.TILES_DEFAULT_SIZE, Game.TILES_DEFAULT_SIZE, tiles_sprite);
+				level_tiles[tiles_index] = LoadAssets.GetSubSprite(i*Game.TILES_DEFAULT_SIZE, j*Game.TILES_DEFAULT_SIZE, Game.TILES_DEFAULT_SIZE, Game.TILES_DEFAULT_SIZE, tiles_sprite);
 				tiles_index++;
 			}
 		}
@@ -202,32 +226,10 @@ public class LevelGenerator {
 
 	}
 	
-	public void levelReset() {
-		pause = true;
-		
-		if(head_chunk != null) {
-			//Delete all the chunk platforms
-			while(head_chunk != null) {
-				ChunkPlatform tmp = head_chunk.getNext();
-				head_chunk = null;
-				head_chunk = tmp;	
-			}
-			// Spawn the first chunk
-			spawnChunk();
-			
-			// Set the first platform chunk to the head
-			collision_plt = null;
-		}
-	}
-	
 	private void renderPlatform(Graphics g, Platform plt) {
 		for(int i=0; i<plt.getSize(); i++) {
 			g.drawImage(plt.getPltTile(i), (int)plt.getX() + (i * Game.TILES_SIZE), (int)plt.getY(), Game.TILES_SIZE, Game.TILES_SIZE, null);
 		}
-	}
-
-	public boolean getPause() {
-		return pause;
 	}
 	
 //	private void drawAllTiles_debug(Graphics g) {

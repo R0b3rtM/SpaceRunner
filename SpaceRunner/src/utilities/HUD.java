@@ -17,11 +17,11 @@ public class HUD {
 	private int hud_index = MAIN_HUD;
 	
 	public HUD() {
-		heart = LoadSprite.LoadSpriteImg(LoadSprite.HEART_SPRITE);
-		coin = LoadSprite.LoadSpriteImg(LoadSprite.COIN_SPRITE);
+		heart = LoadAssets.LoadSpriteImg(LoadAssets.HEART_SPRITE);
+		coin = LoadAssets.LoadSpriteImg(LoadAssets.COIN_SPRITE);
 		
-		LoadSprite.LoadFont();
-		game_font = LoadSprite.LoadFont();
+		LoadAssets.LoadFont();
+		game_font = LoadAssets.LoadFont();
 	}
 	
 	public void renderHUD(Graphics g, int player_lives, int player_coins) {

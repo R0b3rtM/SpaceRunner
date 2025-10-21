@@ -4,7 +4,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 import main.Game;
-import utilities.LoadSprite;
+import utilities.LoadAssets;
 
 import static utilities.Constants.ItemsConstants.*;
 
@@ -77,11 +77,11 @@ public class Item {
 		switch(type) {
 		case HEART_ID:
 			// Set heart sprite
-			sprite = LoadSprite.LoadSpriteImg(LoadSprite.HEART_SPRITE);
+			sprite = LoadAssets.LoadSpriteImg(LoadAssets.HEART_SPRITE);
 			break;
 		case COIN_ID:
 			// Set coin sprite
-			sprite = LoadSprite.LoadSpriteImg(LoadSprite.COIN_SPRITE);
+			sprite = LoadAssets.LoadSpriteImg(LoadAssets.COIN_SPRITE);
 			break;
 		}
 	}
