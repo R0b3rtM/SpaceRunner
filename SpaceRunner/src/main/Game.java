@@ -42,7 +42,7 @@ public class Game implements Runnable{
 	
 	public Game() {
 		level_gen = new LevelGenerator();
-		player = new Player(200, 200, level_gen);
+		player = new Player(200, 200, this);
 		enemy_gen = new EnemyGenerator(this);
 		game_panel = new GamePanel(this);
 		game_window =  new GameWindow(game_panel);
@@ -51,6 +51,14 @@ public class Game implements Runnable{
 		
 		game_panel.setBackground(GAME_BACKGROUND);
 		start_game();
+	}
+	
+	public LevelGenerator getLevelGen() {
+		return level_gen;
+	}
+	
+	public Enemy getEnemy() {
+		return curr_enemy;
 	}
 	
 	public Player getPlayer() {

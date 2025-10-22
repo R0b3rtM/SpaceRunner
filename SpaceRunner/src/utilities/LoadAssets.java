@@ -18,6 +18,7 @@ public class LoadAssets {
 	public static final String TILES_SPRITE = "Tiles.png";
 	public static final String HEART_SPRITE = "Heart.png";
 	public static final String COIN_SPRITE = "Coin.png";
+	public static final String BALL_SPRITE = "AlienBall.png";
 	
 	public static BufferedImage LoadSpriteImg(String sprite_url) {
 		

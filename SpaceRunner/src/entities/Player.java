@@ -22,6 +22,7 @@ import static utilities.Collisions.*;
 public class Player extends Entity implements Shootable{
 	
 	private ShootingHandler shoot_handler;
+	private Game game;
 	private LevelGenerator level_gen;
 		
 	private int draw_offset_width = (int)(16 * Game.SCALE);
@@ -33,14 +34,15 @@ public class Player extends Entity implements Shootable{
 	private int shoot_time = Game.UPS_SET * 2;
 	private int coins = 0;
 	
-	public Player(int x, int y, LevelGenerator level_gen) {
+	public Player(int x, int y, Game game) {
 		super(x, y, MAX_LIVES);
 		
 		entity = new BufferedImage[ANIM_AMOUNT][ANIM_FRAMES];
 		sprite_url = LoadAssets.PLAYER_SPRITE;
 		shoot_handler = new ShootingHandler(shoot_time, this);
 		
-		this.level_gen = level_gen;
+		this.game = game;
+		this.level_gen = game.getLevelGen();
 		
 		animInit(ANIM_AMOUNT, ANIM_FRAMES);
 		animSet(IDLE_ANIM);
@@ -79,20 +81,12 @@ public class Player extends Entity implements Shootable{
 		return coins;
 	}
 	
-	public int getLives() {
-		return lives;
-	}
-	
-	public void hurt() {
-		lives--;
-	}
-	
 	public void addCoin() {
 		coins++;
 	}
 	
 	public void addLives() {
-		if(lives == 3)
+		if(lives >= MAX_LIVES)
 			return;
 		
 		lives++;
@@ -113,8 +107,15 @@ public class Player extends Entity implements Shootable{
 	
 	@Override
 	public void shoot() {
-		System.out.println("Shoot!");
 		laser_alpha = 1f;
+		
+		Enemy curr_enemy = game.getEnemy();
+		int gun_nuzzle_height = (int)(hit_box.y + hit_box.height/2);
+		
+		if(curr_enemy == null) return;
+		if(gun_nuzzle_height <= (int)(curr_enemy.getHitBox().y + curr_enemy.getHitBox().height) && gun_nuzzle_height >= (int)(curr_enemy.getHitBox().y)) {
+			curr_enemy.hurt();
+		}
 	}
 	
 	private void animUpdate() {

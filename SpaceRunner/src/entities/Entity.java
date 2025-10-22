@@ -27,6 +27,18 @@ public class Entity {
 		this.lives = lives;
 	}
 	
+	public boolean getDeathStatus() {
+		return entity_died;
+	}
+	
+	public int getLives() {
+		return lives;
+	}
+	
+	public void hurt() {
+		lives--;
+	}
+	
 	public Rectangle2D.Float getHitBox() {
 		return hit_box;
 	}

@@ -1,5 +1,7 @@
 package level;
 
+import static utilities.Collisions.*;
+
 import java.util.Random;
 
 import entities.Enemy;
@@ -31,9 +33,15 @@ public class EnemyGenerator {
 			System.out.println("Enemy spawned");
 		}
 		
-		// Start spawn time if no enemy exists
-		if(curr_enemy == null && game.getGameState() != Game.MENU_STATE && game.getGameState() != Game.DEATH_STATE)
-			spawn_tick++;
+		if(curr_enemy == null) {
+			// Start spawn time if no enemy exists
+			if(game.getGameState() != Game.MENU_STATE && game.getGameState() != Game.DEATH_STATE)
+				spawn_tick++;
+		} else {
+			// Reset the enemy id died and reached the floor
+			if(isOnFloor(curr_enemy.getHitBox()) && curr_enemy.getDeathStatus())
+				enemyReset();
+		}
 	}
 	
 	public Enemy getEnemy() {
