@@ -65,6 +65,10 @@ public class Game implements Runnable{
 		return player;
 	}
 	
+	public HUD getHUD() {
+		return hud;
+	}
+	
 	public void render(Graphics g) {
 		level_gen.render(g);
 		

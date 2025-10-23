@@ -8,7 +8,7 @@ import main.Game;
 public class ItemsGenerator {
 	
 	private Item head, tail;
-	private int item_spawn_time = Game.UPS_SET * 2, spawn_tick = 0;
+	private int item_spawn_time = Game.UPS_SET * 5, spawn_tick = 0;
 	
 	private int max_y_pos = 13, min_y_pos = 10;
 	private Random rnd = new Random();

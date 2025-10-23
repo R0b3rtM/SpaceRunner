@@ -12,7 +12,9 @@ public class Item {
 	
 	private Item nextItem = null;
 	private BufferedImage sprite;
-	private int x, y, type;
+	
+	protected float x, y;
+	protected int type;
 	
 	private int anim_speed = 10, anim_tick = 0;
 	private int max_y_pos = -5, anim_pos = 0;
@@ -38,11 +40,11 @@ public class Item {
 		return this.type;
 	}
 	
-	public int getX() {
+	public float getX() {
 		return this.x;
 	}
 	
-	public int getY() {
+	public float getY() {
 		return this.y;
 	}
 	
@@ -70,7 +72,7 @@ public class Item {
 	}
 	
 	public void renderItem(Graphics g) {
-		g.drawImage(sprite, x, y, Game.TILES_SIZE, Game.TILES_SIZE, null);
+		g.drawImage(sprite, (int)x, (int)y, Game.TILES_SIZE, Game.TILES_SIZE, null);
 	}
 	
 	private void init() {
@@ -82,6 +84,10 @@ public class Item {
 		case COIN_ID:
 			// Set coin sprite
 			sprite = LoadAssets.LoadSpriteImg(LoadAssets.COIN_SPRITE);
+			break;
+		case BALL_ID:
+			// Set coin sprite
+			sprite = LoadAssets.LoadSpriteImg(LoadAssets.BALL_SPRITE);
 			break;
 		}
 	}

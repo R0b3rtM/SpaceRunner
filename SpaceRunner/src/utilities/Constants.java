@@ -22,11 +22,14 @@ public class Constants {
 		public static final int ANIM_FRAMES = 4;
 		
 		public static final int MAX_LIVES = 5;
+		public static final int DEF_Y_POS = 7;
+		public static final int DEF_X_POS = 7;
 	}
 	
 	public static class ItemsConstants {
 		public static final int HEART_ID = 0;
 		public static final int COIN_ID = 1;
+		public static final int BALL_ID = 2;
 	}
 	
 	public static class HUDConstants {

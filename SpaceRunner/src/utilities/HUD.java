@@ -12,16 +12,23 @@ import static utilities.Constants.HUDConstants.*;
 
 public class HUD {
 	
-	private BufferedImage heart, coin;
+	private static final int ANIM_FRAMES = 5;
+	
+	private BufferedImage heart, coin, reload_circle;
+	private BufferedImage[] reload_circle_anim;
 	private Font game_font;
 	private int hud_index = MAIN_HUD;
+	
+	private int anim_tick = 0, anim_state = 0;
 	
 	public HUD() {
 		heart = LoadAssets.LoadSpriteImg(LoadAssets.HEART_SPRITE);
 		coin = LoadAssets.LoadSpriteImg(LoadAssets.COIN_SPRITE);
+		animInit();
 		
 		LoadAssets.LoadFont();
 		game_font = LoadAssets.LoadFont();
+		
 	}
 	
 	public void renderHUD(Graphics g, int player_lives, int player_coins) {
@@ -40,6 +47,7 @@ public class HUD {
 			
 		case PLAY_HUD:
 			// Play menu display
+			g.drawImage(reload_circle_anim[anim_state], 0, Game.GAME_HEIGHT - Game.TILES_SIZE, Game.TILES_SIZE, Game.TILES_SIZE, null);
 			break;
 			
 		case DEATH_HUD:
@@ -51,6 +59,21 @@ public class HUD {
 	
 	public void setHUD(int index) {
 		hud_index = index;
+	}
+	
+	public void reloadCircleAnim(int anim_speed) {
+		if(anim_tick >= anim_speed/(ANIM_FRAMES-1.5f)) {
+			anim_state++;
+			anim_tick = 0;
+			if(anim_state >= ANIM_FRAMES)
+				anim_state = ANIM_FRAMES-1;
+		}
+		anim_tick++;
+			
+	}
+	
+	public void resetCircleAnim() {
+		anim_state = 0;
 	}
 	
 	private void resetMenu(Graphics g) {
@@ -92,5 +115,15 @@ public class HUD {
 		int draw_y = Game.TILES_SIZE - 20;
 		
 		g.drawString(Integer.toString(player_coins), draw_x, draw_y);
+	}
+	
+	private void animInit() {
+		reload_circle = LoadAssets.LoadSpriteImg(LoadAssets.RELOAD_CIRCLE_SPRITE);
+		reload_circle_anim = new BufferedImage[ANIM_FRAMES];
+		
+		reload_circle_anim[0] = LoadAssets.GetSubSprite(Game.TILES_DEFAULT_SIZE, 0, Game.TILES_DEFAULT_SIZE, Game.TILES_DEFAULT_SIZE, reload_circle);
+		for(int i=0; i<ANIM_FRAMES-1; i++) {
+			reload_circle_anim[i+1] = LoadAssets.GetSubSprite(i*Game.TILES_DEFAULT_SIZE, Game.TILES_DEFAULT_SIZE, Game.TILES_DEFAULT_SIZE, Game.TILES_DEFAULT_SIZE, reload_circle);
+		}
 	}
 }

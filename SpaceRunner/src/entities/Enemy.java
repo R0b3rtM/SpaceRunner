@@ -1,10 +1,14 @@
 package entities;
 
 import static utilities.Constants.EnemyConstants.*;
+import static utilities.Collisions.*;
 
 import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
+import items.AlienBall;
 import main.Game;
 import utilities.LoadAssets;
 import utilities.Shootable;
@@ -14,12 +18,13 @@ public class Enemy extends Entity implements Shootable{
 	
 	private ShootingHandler shoot_handler;
 	private Player player;
+	private AlienBall ball;
 	
 	private int draw_offset_width = (int)(13 * Game.SCALE);
 	private int draw_offset_height = (int)(5 * Game.SCALE);
 	
-	private int default_x_pos = Game.GAME_WIDTH - Game.TILES_SIZE * 7;
-	private int default_y_pos = Game.TILES_SIZE * 7;
+	private int default_x_pos = Game.GAME_WIDTH - Game.TILES_SIZE * DEF_X_POS;
+	private int default_y_pos = Game.TILES_SIZE * DEF_Y_POS;
 	private boolean reached_def_pos = false;
 	
 	private float verticle_fly_speed = 0.5f;
@@ -33,7 +38,7 @@ public class Enemy extends Entity implements Shootable{
 		
 		this.player = player;
 		entity = new BufferedImage[ANIM_AMOUNT][ANIM_FRAMES];
-		shoot_handler = new ShootingHandler(shoot_time, this);
+		shoot_handler = new ShootingHandler(shoot_time, this, null);
 		sprite_url = LoadAssets.ALIEN_SPRITE;
 		entity_anim = IDLE_ANIM;
 		
@@ -48,12 +53,22 @@ public class Enemy extends Entity implements Shootable{
 		enemyDeath();
 		shoot_handler.shootUpdate();
 		shoot_handler.tryShoot();
+		System.out.println((int)((player.getHitBox().y/Game.TILES_SIZE)) - (int)(hit_box.y/Game.TILES_SIZE));
+		if(ball != null) {
+			ball.updateBall();
+			if(ball.getBallStatus())
+				ball = null;
+		}
 	}
 	
 	public void render(Graphics g) {
 		// Enemy render
 		g.drawImage(entity[entity_anim][anim_state], (int)hit_box.x - draw_offset_width, (int)hit_box.y - draw_offset_height, Game.TILES_SIZE * 3, Game.TILES_SIZE * 3, null);
 		//drawHitBox(g);
+		
+		if(ball != null) {
+			ball.renderItem(g);
+		}
 	}
 	
 	@Override
@@ -66,7 +81,9 @@ public class Enemy extends Entity implements Shootable{
 	@Override
 	public void shoot() {
 		// Spawn alien ball
-		System.out.println("Enemy shoot");
+		if(ball == null) {
+			ball = new AlienBall((int)hit_box.x, (int)hit_box.y, player);
+		}
 		
 	}
 	
@@ -81,30 +98,30 @@ public class Enemy extends Entity implements Shootable{
 		// Adjust to default X and Y position
 		if(!entity_died) {
 			if(!reached_def_pos) {
+				
 				if(hit_box.x > default_x_pos) {
 					hit_box.x -= horizontal_fly_speed;
 				} else if(hit_box.x < default_x_pos){
 					hit_box.x += horizontal_fly_speed;
 				}
 				
-				if(hit_box.y > default_y_pos) {
-					hit_box.y -= verticle_fly_speed;
-				} else if(hit_box.y < default_y_pos){
+				if(hit_box.y < default_y_pos){
 					hit_box.y += verticle_fly_speed;
 				}
-				
-				if((int)(hit_box.x/Game.TILES_SIZE) == (int)(default_x_pos/Game.TILES_SIZE) && (int)(hit_box.y/Game.TILES_SIZE) == (int)(default_y_pos/Game.TILES_SIZE))
+
+				if((int)(hit_box.x/Game.TILES_SIZE) == (int)(default_x_pos/Game.TILES_SIZE) )
 					reached_def_pos = true;
 			} else {
 				// escape from player's Y position
 				int player_y_pos = (int)(player.getHitBox().y / Game.TILES_SIZE);
 				int enemy_bottom = (int)((hit_box.y + hit_box.height) / Game.TILES_SIZE);
-				if(enemy_bottom >= player_y_pos) {
+				if(enemy_bottom > player_y_pos) {
 					hit_box.y -= verticle_fly_speed;
 				} else {
 					if(enemy_bottom < (int)(default_y_pos/Game.TILES_SIZE))
 						hit_box.y += verticle_fly_speed;
 				}
+				
 			}
 		} else {
 			hit_box.y += fall_speed;

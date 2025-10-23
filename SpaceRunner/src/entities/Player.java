@@ -39,7 +39,7 @@ public class Player extends Entity implements Shootable{
 		
 		entity = new BufferedImage[ANIM_AMOUNT][ANIM_FRAMES];
 		sprite_url = LoadAssets.PLAYER_SPRITE;
-		shoot_handler = new ShootingHandler(shoot_time, this);
+		shoot_handler = new ShootingHandler(shoot_time, this, game);
 		
 		this.game = game;
 		this.level_gen = game.getLevelGen();
